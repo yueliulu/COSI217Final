@@ -1,12 +1,13 @@
 import csv
-import html
+import json
 import os
 import re
 
 from collections import Counter
+from langdetect import detect, LangDetectException
+from tqdm import tqdm
 import random
-
-# import emoji
+import emojis
 
 
 # TODO
@@ -24,66 +25,84 @@ def process_emoji(input_file: str, output_file: str):
     Returns: None
 
     """
+    data = {}  # Dictionary to store the data
     with open(input_file, 'r', encoding='utf-8') as f:
-        with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
-            csv_writer = csv.writer(out_file)
-            csv_writer.writerow(['ID', 'Comments'])
-            csv_reader = csv.reader(f)
-            # next(csv_reader)
-            id = 0
-            # ------- uncomment the following if you want only the dominate emoji in your output data ------ #
-            # dominate_emoji = ':' + emoji_name + ':'
-            # dominate_emoji_character = emoji.emojize(dominate_emoji)
-            for item in csv_reader:
-                if len(item) == 0:  # skip empty lines
-                    continue
-                item = item[0]
-                item_l = item.split()
-                # strip off the web link and twetter handle
-                comment_list = [i for i in item_l if "@" not in i and 'https' not in i]
-                comment = ' '.join(comment_list)
-                if not remove_only_emojis(comment):
-                    id += 1
-                    commtent = remove_html_tags(comment)
-                    csv_writer.writerow([id, commtent])
-
-                # character_counter = Counter(comment)
-                # emojis = {}
-                # for char, count in character_counter.items():
-                #     if emoji.is_emoji(char):
-                #         emojis.update({char: count})
-                # if len(emojis) == 1 and emoji.demojize(list(emojis.keys())[0]) == dominate_emoji:
-                #     id += 1
-                #     csv_writer.writerow([id, comment])
+        # with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
+        #     csv_writer = csv.writer(out_file)
+        #     csv_writer.writerow(['ID', 'Comments', 'raw text', 'emojis'])
+        csv_reader = csv.reader(f)
+        next(csv_reader)
+        id = 0
+        # ------- uncomment the following if you want only the dominate emoji in your output data ------ #
+        # dominate_emoji = ':' + emoji_name + ':'
+        # dominate_emoji_character = emoji.emojize(dominate_emoji)
+        for item in tqdm(csv_reader):
+            if len(item) == 0:  # skip empty lines
+                continue
+            comment = remove_mentions_and_links(item[0])  # strip off the web link and twetter handle
+            valid_comment, text_emoji_map = remove_only_emojis(comment)
+            if valid_comment:
+                id += 1
+                comment = remove_html_tags(comment)
+                data[id] = {
+                    "Comments": comment,
+                    "raw text": text_emoji_map[0],
+                    "emojis": text_emoji_map[1]
+                }
+                # csv_writer.writerow([id, comment, text_emoji_map[0], text_emoji_map[1]])
+            # Write the dictionary to a JSON file
+    with open(output_file, 'w', encoding='utf-8') as json_file:
+        json.dump(data, json_file, indent=4)
+    return id
 
 
-def remove_only_emojis(tweet: str):
-    '''
+def remove_mentions_and_links(comment: str):
+    cleaned_text = re.sub(r'@\w+', '', comment)  # Remove Twitter handles
+    cleaned_text = re.sub(r'https?://\S+', '', cleaned_text)  # Remove links
+    return cleaned_text.strip().lower()
+
+
+def remove_only_emojis(comment: str):
+    """
 
     Args:
         tweet: input tweet comments
 
-    Returns: return True if the tweet only contains emoji and only one kind of emoji
+    Returns: return True if the tweet only contains emoji and no context
 
 
-    '''
+    """
+    unicode_range = r'[\U0001F004-\U0001F9F6\U0001FA70-\U0001FA73\U0001FA78-\U0001FA7A\U0001FA80-\U0001FA82' \
+                    r'\U0001FA90-\U0001FA95\U0001FAA0-\U0001FAA8\U0001FAB0-\U0001FAB6\U0001FAC0-\U0001FAC2' \
+                    r'\U0001FAD0-\U0001FAD6\U0001FAE0-\U0001FAE7\U0001FAF0-\U0001FAF4]'
     emojis = []
-    strings = []
+    cleaned_text = ''
     i = 0
-    while i < len(tweet):
-        # Emojis can take up multiple characters, so we need to handle them accordingly
-        if 0x1F000 <= ord(tweet[i]) <= 0x1FFFF:
-            emojis.append(tweet[i])
-            i += 1
-        elif 0x2000 <= ord(tweet[i]) <= 0x3FFF or 0x4000 <= ord(tweet[i]) <= 0xDFFF or 0xE000 <= ord(
-                tweet[i]) <= 0xFFFF:
-            emojis.append(tweet[i:i + 2])
-            i += 2
+    while i < len(comment):
+        # Check if the current character is an emoji
+        if re.match(unicode_range, comment[i]):
+            # Find the end index of the current emoji sequence
+            end_index = i + 1
+            while end_index < len(comment) and re.match(
+                    unicode_range,
+                    comment[end_index]):
+                end_index += 1
+            # Append each emoji character individually to the emojis list
+            emojis.extend(list(comment[i:end_index]))
+            i = end_index
         else:
-            strings.append(tweet[i])
+            # Append non-emoji characters to the cleaned text
+            cleaned_text += comment[i]
             i += 1
-    # return True if the tweet only contains one kind of emoji and no context
-    return len(Counter(emojis)) == 1 and len(strings) == 0
+    # return True if the tweet only contains emoji and no context or only text no emoji
+    try:
+        language = detect(cleaned_text)
+        if len(emojis) > 0 and len(cleaned_text) > 0 and language == "en":
+            return True, (cleaned_text, emojis)
+        return False, (cleaned_text, emojis)
+    except LangDetectException as e:
+        return False, (cleaned_text, emojis)
+
 
 
 def remove_html_tags(comment):
@@ -94,75 +113,29 @@ def remove_html_tags(comment):
     return clean_string
 
 
-def pilot_annotation(num: int, input_file: str, annotation_file: str, left_annotation_file: str):
-    '''
-
-    Args:
-        num: num of tweets to randomly select
-        input_file: input tweets file
-        annotation_file: file containing randomly selected tweets to be annotated
-        left_annotation_file: tweets left
-
-    Returns:
-
-    '''
-    to_annotate = []
-    left_annotation = []
-
-    # random select num number of tweets
-    with open(input_file, 'r', encoding='utf-8') as f:
-        csv_reader = list(csv.DictReader(f))
-        num_lines = int(csv_reader[-1]["ID"])  # get the total number of tweets in the input file
-        random_ids = sorted(random.sample(range(1, num_lines), num))
-
-        # get rows to be annotated and rows left
-
-        for tweet in csv_reader:
-            if int(tweet['ID']) in random_ids:
-                to_annotate.append(tweet)
-            else:
-                left_annotation.append(tweet)
-
-    # generating file for annotation
-    with open(annotation_file, 'w', newline='', encoding='utf-8') as annotation_file:
-        csv_writer = csv.DictWriter(annotation_file, fieldnames=['ID', 'Comments'])
-        csv_writer.writeheader()
-        csv_writer.writerows(to_annotate)
-
-    # generating file of left annotations
-    with open(left_annotation_file, 'w', newline='', encoding='utf-8') as left_annotation_file:
-        csv_writer = csv.DictWriter(left_annotation_file, fieldnames=['ID', 'Comments'])
-        csv_writer.writeheader()
-        csv_writer.writerows(left_annotation)
-
-
-def get_emojis_info(dir: str, output_file: str):
+def text_emoji_mapping(comment):
     """
-
+        Args:
+            comment: single tweeter comment
+        Return:
+            tuple containing the raw text and all emojis containing in the tweeter comment
     """
-    with open(output_file, 'w', encoding='utf-8')as f:
-        csv_writer = csv.writer(f)
-        csv_writer.writerow(['emoji name', 'num of tweets'])
-        for file in os.listdir(dir):
-            emoji_name = file.replace(".csv", "")
-            csv_reader = list(csv.DictReader(file))
-            num_lines = int(csv_reader[-1]["ID"])  # get the total number of tweets in the input file
-            csv_writer.writerow([emoji_name, num_lines])
 
 
 if __name__ == '__main__':
     directory = 'Data/processed_data/'
-    emojis = ['face_holding_back_tears(updated).csv', 'smiling_face_with_tear(updated).csv',
-              'loudly_crying_face(updated).csv']
-    # for emoji in emojis:
-    #     pilot_annotation(100, f"{emoji}", f"(to_annotate){emoji}", f'(left){emoji}')
-    # process_emoji("Data/archive/face_holding_back_tears.csv", "face_holding_back_tears.csv")
-    # process_emoji("Data/archive/smiling_face_with_tear.csv", 'smiling_face_with_tear.csv')
-    # process_emoji("Data/archive/loudly_crying_face.csv", 'loudly_crying_face.csv')
-
+    emoji_info = {}
+    process_emoji("Data/archive/egg.csv", 'sample.json')
     ################## UNCOMMENT BELOW TO PROCESS THE WHOLE FOLDER ##########################
     # for filename in os.listdir(directory):
     #     emoji_name = filename.replace('.csv', '')
-    #     process_emoji("Data/archive/" + filename, "Data/processed_data/" + filename)
-
-    get_emojis_info(directory, "emoji_info.csv")
+    #     emoji_info[emoji_name] = process_emoji("Data/archive/" + filename, "Data/processed_data/" + emoji_name + '.json')
+    #
+    # ################ UNCOMMENT BELOW TO GOTHER EMOJI INFO #########################
+    # with open('emoji_info.csv', 'w', encoding='utf-8') as f:
+    #     writer = csv.writer(f)
+    #     # Write header
+    #     writer.writerow(['emoji name', 'num of tweeter'])
+    #     # Write data
+    #     for key, value in emoji_info.items():
+    #         writer.writerow([key, value])
