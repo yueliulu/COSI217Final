@@ -7,7 +7,8 @@ from collections import Counter
 from langdetect import detect, LangDetectException
 from tqdm import tqdm
 import random
-import emojis
+import emoji
+import os
 
 
 # TODO
@@ -15,12 +16,35 @@ import emojis
 # replace html characters
 # include multiple emojis tweets
 
-def process_emoji(input_file: str, output_file: str):
+def emoji_name_to_unicode(path):
+    # List files in the specified directory
+    files = os.listdir(path)
+
+    # Initialize a list to hold the Unicode emojis
+    unicode_emojis = []
+
+    # Loop through each file name
+    for file in files:
+        if file.endswith(".csv"):
+            # Remove the '.csv' and replace underscores with spaces
+            emoji_name = file[:-4]
+
+            try:
+                # Convert emoji name to its Unicode character
+                unicode_char = emoji.emojize(f":{emoji_name}:")
+                unicode_emojis.append(unicode_char)
+            except KeyError:
+                print(f"No emoji found for: {emoji_name}")
+
+    return unicode_emojis
+
+
+def process_emoji(input_file: str, output_file: str, valid_emojis):
     """
 
     Args:
         input_file: original file name contains unprocessed comments and emojis
-        output_file: csv file with id and processed comments that only contain 1 type of emoji per file
+        output_file: csv_file with id and processed comments that only contain 1 type of emoji per file
 
     Returns: None
 
@@ -44,13 +68,15 @@ def process_emoji(input_file: str, output_file: str):
             if valid_comment:
                 id += 1
                 comment = remove_html_tags(comment)
+
+                emojis = [emoji for emoji in text_emoji_map[1] if emoji in valid_emojis]
                 data[id] = {
                     "Comments": comment,
                     "raw text": text_emoji_map[0],
-                    "emojis": text_emoji_map[1]
+                    "emojis": emojis
                 }
-                # csv_writer.writerow([id, comment, text_emoji_map[0], text_emoji_map[1]])
-            # Write the dictionary to a JSON file
+                    # csv_writer.writerow([id, comment, text_emoji_map[0], emojis])
+    # Write the dictionary to a JSON file
     with open(output_file, 'w', encoding='utf-8') as json_file:
         json.dump(data, json_file, indent=4)
     return id
@@ -123,13 +149,18 @@ def text_emoji_mapping(comment):
 
 
 if __name__ == '__main__':
-    directory = 'Data/processed_data/'
+    # directory = 'Data/processed_data/'
+
+    directory = 'Data/archive'
+    emojis_list = emoji_name_to_unicode(directory)
+
     emoji_info = {}
-    process_emoji("Data/archive/egg.csv", 'sample.json')
-    ################## UNCOMMENT BELOW TO PROCESS THE WHOLE FOLDER ##########################
+    process_emoji("Data/archive/egg.csv", 'sample.csv', emojis_list)
+    # ################# UNCOMMENT BELOW TO PROCESS THE WHOLE FOLDER ##########################
     # for filename in os.listdir(directory):
     #     emoji_name = filename.replace('.csv', '')
-    #     emoji_info[emoji_name] = process_emoji("Data/archive/" + filename, "Data/processed_data/" + emoji_name + '.json')
+    #     emoji_info[emoji_name] = process_emoji("Data/archive/" + filename, "Data/processed_data/csv_file/" +
+    #                                            emoji_name + '.csv', valid_emojis=emojis_list)
     #
     # ################ UNCOMMENT BELOW TO GOTHER EMOJI INFO #########################
     # with open('emoji_info.csv', 'w', encoding='utf-8') as f:
