@@ -31,10 +31,9 @@ def load_ckp(checkpoint_fpath, model, optimizer):
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-def load_model():
+def load_model(checkpoint_path):
     model = BERTClass(dr=DR, num_class=NUM_CLASS, hidden_dim=HIDDEN_DIM)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    checkpoint_path = 'best_model.pt'
     model, optimizer, start_epoch, valid_loss_min = load_ckp(checkpoint_path, model, optimizer)
     return model
 
@@ -69,6 +68,7 @@ def predict(input: str, model):
 
 if __name__ == '__main__':
     input = "Hello, how are you"
-    model = load_model()
+    checkpoint_path = 'best_model.pt'
+    model = load_model(checkpoint_path)
     output = predict(input, model)
     print(output)
