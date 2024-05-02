@@ -33,6 +33,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 
 def load_model(checkpoint_path):
     model = BERTClass(dr=DR, num_class=NUM_CLASS, hidden_dim=HIDDEN_DIM)
+    print(model.parameters())
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model, optimizer, start_epoch, valid_loss_min = load_ckp(checkpoint_path, model, optimizer)
     return model
@@ -65,6 +66,14 @@ def predict(input: str, model):
         potential_emoji = [emojis[i] for i in range(len(final_output[0])) if final_output[0][i] > 0.5]
         return potential_emoji
 
+def predict_with_trained_model(input):
+    print("in predict")
+    input = "Hello, how are you"
+    checkpoint_path = 'best_model.pt'
+    model = load_model(checkpoint_path)
+    print("in predict")
+    output = predict(input, model)
+    return output
 
 if __name__ == '__main__':
     input = "Hello, how are you"

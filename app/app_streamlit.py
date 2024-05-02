@@ -3,16 +3,19 @@ import sqlite3
 import random
 import re
 
+import sys
+import os
+sys.path.append(os.path.abspath('../model'))
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+from predict import predict_with_trained_model
+
 conn=sqlite3.connect('example.db')
 c = conn.cursor()
 c.execute("""CREATE TABLE IF NOT EXISTS emoji_counts(vocab varchar not null,
                                                      emoji varchar not null,
                                                      cnt integer not null,
                                                      primary key(vocab, emoji));""")
-# c.execute("""CREATE TABLE IF NOT EXISTS inputs(id integer primary key,
-#                                                text varchar not null,
-#                                                emojis varchar not null,
-#                                                );""")
+
 c.execute("""CREATE TABLE IF NOT EXISTS inputs(
                 id INTEGER PRIMARY KEY,
                 text VARCHAR NOT NULL,
@@ -43,6 +46,7 @@ def main():
 
         if st.session_state.stage > 0:
             #st.write(text)
+            print("here")
             emojis = emoji_generator(text)
             if st.session_state.stage == 1:
                 update_database(text, emojis)
@@ -102,6 +106,7 @@ def set_stage(stage):
 def emoji_generator(text):
     # random_list = [random.randint(0, 1) for _ in range(5)]
     # return random_list
+    predict_with_trained_model(text)
     if text == "I love COSI217":
         return ['\u2764\ufe0f', '\U0001F60D']
     if text == "I love cooking":
