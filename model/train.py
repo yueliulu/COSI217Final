@@ -1,11 +1,11 @@
 import torch
 import pandas as pd
 import numpy as np
-import shutil
 import sys
 from transformers import BertTokenizer, BertModel
 from model import BERTClass
 from load_data import CustomDataset
+from utils import save_ckp
 
 train_path = "../Data/train.csv"
 eval_path = "../Data/eval.csv"
@@ -13,12 +13,10 @@ eval_path = "../Data/eval.csv"
 df = pd.read_csv(train_path)
 columns = df.columns[:-1]
 
-df = df[:1000]
-
 
 MAX_LEN = 128
 BATCH_SIZE = 32
-EPOCHS = 2
+EPOCHS = 5
 LEARNING_RATE = 1e-05
 NUM_CLASS = len(columns)
 DR = 0.2
@@ -54,22 +52,6 @@ optimizer = torch.optim.Adam(params =  model.parameters(), lr=LEARNING_RATE)
 val_targets = []
 val_outputs = []
 
-
-def save_ckp(state, is_best, checkpoint_path, best_model_path):
-    """
-    state: checkpoint we want to save
-    is_best: is this the best checkpoint; min validation loss
-    checkpoint_path: path to save checkpoint
-    best_model_path: path to save best model
-    """
-    f_path = checkpoint_path
-    # save checkpoint data to the path given, checkpoint_path
-    torch.save(state, f_path)
-    # if it is a best model, min validation loss
-    if is_best:
-        best_fpath = best_model_path
-        # copy that checkpoint file to best path given, best_model_path
-        shutil.copyfile(f_path, best_fpath)
 
 def train_model(n_epochs, training_loader, validation_loader, model,
                 optimizer, checkpoint_path, best_model_path):
