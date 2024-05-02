@@ -7,8 +7,8 @@ from transformers import BertTokenizer, BertModel
 from model import BERTClass
 from load_data import CustomDataset
 
-train_path = "data/train.csv"
-eval_path = "data/eval.csv"
+train_path = "../Data/train.csv"
+eval_path = "../Data/eval.csv"
 
 df = pd.read_csv(train_path)
 columns = df.columns[:-1]
