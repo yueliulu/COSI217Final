@@ -4,7 +4,7 @@ from utils import *
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-def predict(input: str, model, threshode: float):
+def predict(input: str, model, threshold):
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
@@ -29,15 +29,23 @@ def predict(input: str, model, threshode: float):
         final_output = torch.sigmoid(output).cpu().detach().numpy().tolist()
         # print(final_output)
         # print(train_df.columns[1:].to_list()[int(np.argmax(final_output, axis=1))])
-        potential_emoji = [emojis[i] for i in range(len(final_output[0])) if final_output[0][i] > threshode]
+        potential_emoji = [emojis[i] for i in range(len(final_output[0])) if final_output[0][i] > threshold]
         if not potential_emoji:
             potential_emoji = [emojis[int(np.argmax(final_output, axis=1))]]
         return potential_emoji
 
+def predict_with_trained_model(input):
+    print("in predict")
+    input = "Hello, how are you"
+    checkpoint_path = 'best_model.pt'
+    model = load_model(checkpoint_path)
+    print("in predict")
+    output = predict(input, model, threshold=0.1)
+    return output
 
 if __name__ == '__main__':
     input = "Hello, how are you"
     checkpoint_path = 'best_model.pt'
     model = load_model(checkpoint_path)
-    output = predict(input, model, threshode=0.1)
+    output = predict(input, model, threshold=0.1)
     print(output)
