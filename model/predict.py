@@ -1,6 +1,7 @@
 from transformers import BertTokenizer
 import numpy as np
 from utils import *
+import os
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -37,7 +38,8 @@ def predict(input: str, model, threshold):
 def predict_with_trained_model(input):
     print("in predict")
     input = "Hello, how are you"
-    checkpoint_path = 'best_model.pt'
+    model_dir = os.path.join(os.path.dirname(__file__))
+    checkpoint_path = os.path.join(model_dir, 'best_model.pt')
     model = load_model(checkpoint_path)
     print("in predict")
     output = predict(input, model, threshold=0.1)

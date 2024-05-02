@@ -29,7 +29,7 @@ def save_ckp(state, is_best, checkpoint_path, best_model_path):
         # copy that checkpoint file to best path given, best_model_path
         shutil.copyfile(f_path, best_fpath)
 
-def load_ckp(checkpoint_fpath, model, optimizer):
+def load_ckp(checkpoint_fpath, model):
     """
     checkpoint_path: path to save checkpoint
     model: model that we want to load checkpoint parameters into
@@ -40,14 +40,14 @@ def load_ckp(checkpoint_fpath, model, optimizer):
     # initialize state_dict from checkpoint to model
     model.load_state_dict(checkpoint['state_dict'])
     # initialize optimizer from checkpoint to optimizer
-    optimizer.load_state_dict(checkpoint['optimizer'])
+    # optimizer.load_state_dict(checkpoint['optimizer'])
     # initialize valid_loss_min from checkpoint to valid_loss_min
     valid_loss_min = checkpoint['valid_loss_min']
     # return model, optimizer, epoch value, min validation loss
-    return model, optimizer, checkpoint['epoch'], valid_loss_min
+    return model, checkpoint['epoch'], valid_loss_min
 
 def load_model(checkpoint_path):
     model = BERTClass(dr=DR, num_class=NUM_CLASS, hidden_dim=HIDDEN_DIM)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    model, optimizer, start_epoch, valid_loss_min = load_ckp(checkpoint_path, model, optimizer)
+    # optimizer = optim.Adam(model.parameters(), lr=0.001)
+    model, start_epoch, valid_loss_min = load_ckp(checkpoint_path, model)
     return model
