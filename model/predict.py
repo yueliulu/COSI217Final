@@ -35,11 +35,15 @@ def predict(input: str, model, threshold):
             potential_emoji = [emojis[int(np.argmax(final_output, axis=1))]]
         return potential_emoji
 
-def predict_with_trained_model(input):
-    print("in predict")
+
+def load_trained_model():
     model_dir = os.path.join(os.path.dirname(__file__))
     checkpoint_path = os.path.join(model_dir, 'best_model.pt')
     model = load_model(checkpoint_path)
+    return model
+
+
+def predict_with_trained_model(input, model):
     print("in predict")
     output = predict(input, model, threshold=0.1)
     return output
