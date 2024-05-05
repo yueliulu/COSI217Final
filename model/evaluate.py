@@ -67,9 +67,9 @@ def get_y_pred_emotion(y_pred, emoji_classification_path):
         y_pred_emotion[:, index] = np.any(y_pred[:, category_indices[category]], axis=1).astype(int)
     return y_pred_emotion
 
-def evaluate(y_true, y_pred):
+def evaluate(y_true, y_pred, labels):
     confusion_matrix = multilabel_confusion_matrix(y_true, y_pred)
-    report = classification_report(y_true, y_pred, target_names=emojis)
+    report = classification_report(y_true, y_pred, target_names=labels)
     return confusion_matrix, report
 
 def calculate_acc(y_true_emotion, y_pred_emotion):
@@ -98,8 +98,12 @@ if __name__ == '__main__':
     #     predict = [emojis[j] for j in range(len(pred_labels)) if pred_labels[j] == 1]
     #     print(text, gold, predict)
 
-    confusion_matrix, report = evaluate(y_true, y_pred)
+    confusion_matrix, report = evaluate(y_true, y_pred, labels=emojis)
+    emotion_confusion_matrix, emotion_report = evaluate(y_true_emotion, y_pred_emotion, labels=['Positive Emotion',
+                                                                                                'Negative Emotion',
+                                                                                                'Others'])
     print("confusion matrix:\n", confusion_matrix)
     print("classification report:\n", report)
-    print(acc)
+    print("acc:", acc)
+    print("emotion classification report:\n", emotion_report)
 
