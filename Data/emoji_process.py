@@ -155,7 +155,7 @@ if __name__ == '__main__':
     emojis_list = emoji_name_to_unicode(directory)
 
     emoji_info = {}
-    process_emoji("Data/archive/egg.csv", 'sample.csv', emojis_list)
+    process_emoji("archive/egg.csv", 'sample.csv', emojis_list)
     # ################# UNCOMMENT BELOW TO PROCESS THE WHOLE FOLDER ##########################
     # for filename in os.listdir(directory):
     #     emoji_name = filename.replace('.csv', '')

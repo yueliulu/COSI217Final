@@ -5,6 +5,7 @@ import re
 
 import emoji
 from grapheme import graphemes
+from langdetect import detect, LangDetectException
 from tqdm import tqdm
 
 
@@ -88,27 +89,32 @@ def process_emoji(file, output_file, emoji_set, repeat_emoji=False):
                 plain_text = ''
                 emoji_list = []
                 item = ' '.join(comment.split())  # strip the empty spaces
-
-                for cluster in graphemes(item):
-                    text = cluster.encode('unicode-escape').decode('utf-8').lower()
-                    if text.startswith('\\u') and text in emoji_set:
-                        # text = item.encode('unicode-escape').decode('utf-8')
-                        # emoji_list.append(text.encode('utf-8').decode('unicode-escape'))
-                        emoji_list.append(cluster)
-                    else:
-                        if text.startswith('\\u'):
-                            continue
-                        else:
-                            plain_text += cluster
-                if not repeat_emoji:  # remove repeated emojis
-                    emoji_list = list(set(emoji_list))
-                if len(emoji_list) >= 1:
-                    data[id] = {
-                        'raw text': item,
-                        'Plain text': plain_text,
-                        'Emojis': emoji_list
-                    }
-                    id += 1
+                try:
+                    # filter out foreign language
+                    language = detect(item)
+                    if language == 'en':
+                        for cluster in graphemes(item):
+                            text = cluster.encode('unicode-escape').decode('utf-8').lower()
+                            if text.startswith('\\u') and text in emoji_set:
+                                # text = item.encode('unicode-escape').decode('utf-8')
+                                # emoji_list.append(text.encode('utf-8').decode('unicode-escape'))
+                                emoji_list.append(cluster)
+                            else:
+                                if text.startswith('\\u'):
+                                    continue
+                                else:
+                                    plain_text += cluster
+                        if not repeat_emoji:  # remove repeated emojis
+                            emoji_list = list(set(emoji_list))
+                        if len(emoji_list) >= 1:
+                            data[id] = {
+                                'raw text': item,
+                                'Plain text': plain_text,
+                                'Emojis': emoji_list
+                            }
+                            id += 1
+                except LangDetectException as e:
+                    continue
                 # print(plain_text, emoji_list)
                 # csv_writer.writerow([id, item, plain_text, emoji_list])
         with open(output_file, 'w', encoding='utf-8') as json_file:
@@ -122,33 +128,28 @@ def remove_mentions_and_links(comment: str):
     return cleaned_text.strip().lower()
 
 
-
-
 if __name__ == '__main__':
-    directory = 'Data/archive'
+    directory = 'archive'
     emoji_info = {}
     # turn the emoji unicode code points into unicode sets
     all_emojis = get_all_emoji_unicode('emoji_unicode_code_points.txt')
     # get 43 emojis from the raw data files
-    file_name_emojis = emoji_name_to_unicode('Data/archive')
+    file_name_emojis = emoji_name_to_unicode('archive')
     filter_emoji_set = all_emojis - file_name_emojis
 
     for filename in os.listdir(directory):
         print(filename)
         emoji_name = filename.replace('.csv', '')
-        emoji_info[emoji_name] = process_emoji("Data/archive/" + filename, "Data/processed_data/json_file/" +
+        emoji_info[emoji_name] = process_emoji("archive/" + filename, "processed_data/json_file/" +
                                                emoji_name + '.json', file_name_emojis)
 
-    # ################ UNCOMMENT BELOW TO GOTHER EMOJI INFO #########################
-    with open('emoji_info.csv', 'w', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        # Write header
-        writer.writerow(['emoji name', 'num of tweeter'])
-        # Write data
-        for key, value in emoji_info.items():
-            writer.writerow([key, value])
+    # ################ UNCOMMENT BELOW TO GATHER EMOJI INFO #########################
+    # with open('emoji_info.csv', 'w', encoding='utf-8') as f:
+    #     writer = csv.writer(f)
+    #     # Write header
+    #     writer.writerow(['emoji name', 'num of tweeter'])
+    #     # Write data
+    #     for key, value in emoji_info.items():
+    #         writer.writerow([key, value])
 
-# TODO
-# 1. remove mentions and links
-# 2. remove only emojis, remove foreign languages
 
