@@ -5,20 +5,19 @@ import sys
 from transformers import BertTokenizer, BertModel
 from model import BERTClass
 from load_data import CustomDataset
-from utils import save_ckp
+from utils import save_ckp, emojis
 
 train_path = "../Data/train.csv"
 eval_path = "../Data/eval.csv"
 
 df = pd.read_csv(train_path)
-columns = df.columns[:-1]
 
 
 MAX_LEN = 128
 BATCH_SIZE = 32
 EPOCHS = 5
 LEARNING_RATE = 1e-05
-NUM_CLASS = len(columns)
+NUM_CLASS = len(emojis)
 DR = 0.2
 HIDDEN_DIM = 768
 
@@ -27,8 +26,8 @@ train_df = df.sample(frac=train_size, random_state=200).reset_index(drop=True)
 val_df = df.drop(train_df.index).reset_index(drop=True)
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-train_dataset = CustomDataset(train_df, tokenizer, MAX_LEN, columns)
-valid_dataset = CustomDataset(val_df, tokenizer, MAX_LEN, columns)
+train_dataset = CustomDataset(train_df, tokenizer, MAX_LEN, emojis)
+valid_dataset = CustomDataset(val_df, tokenizer, MAX_LEN, emojis)
 
 train_data_loader = torch.utils.data.DataLoader(train_dataset,
     batch_size=BATCH_SIZE,

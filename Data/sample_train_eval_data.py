@@ -57,3 +57,14 @@ def load_json(directory):
 df_train, df_eval = load_json(directory)
 df_train.to_csv('train.csv', index=False)
 df_eval.to_csv('eval.csv', index=False)
+
+def classify_label(eval_path, emoji_classiication_path):
+    with open(emoji_classiication_path, 'r') as f:
+        labels = json.load(f)
+
+    eval_df = pd.read_csv(eval_path)
+    for category, label in labels.items():
+        filter_df = eval_df[label]
+        eval_df[category] = filter_df.any(axis=1).astype(int)
+
+    eval_df.to_csv('eval.csv', index=False)
