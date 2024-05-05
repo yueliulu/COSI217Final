@@ -45,8 +45,6 @@ def main():
         tab1, tab2 = st.tabs(["Text with Emojis", "More about Generated Emojis"])
 
         if st.session_state.stage > 0:
-            #st.write(text)
-            print("here")
             emojis = emoji_generator(text)
             if st.session_state.stage == 1:
                 update_database(text, emojis)
@@ -106,11 +104,9 @@ def set_stage(stage):
 def emoji_generator(text):
     # random_list = [random.randint(0, 1) for _ in range(5)]
     # return random_list
-    predict_with_trained_model(text)
-    if text == "I love COSI217":
-        return ['\u2764\ufe0f', '\U0001F60D']
-    if text == "I love cooking":
-        return ['\U0001F60D', '\U0001F373']
+    emojis = predict_with_trained_model(text)
+    print(emojis)
+    return emojis
 
 
 def fetch_data(table):
