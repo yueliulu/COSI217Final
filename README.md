@@ -23,12 +23,13 @@ used in each tweet.
 After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
 the "model" folder. 
 
-With the .pt file in place, use the command below to run the app. Requirements are listed in requirement.txt in the main directory.
+With the .pt file in place, first make sure to start the Docker, then use the command below to run the app. Requirements are listed in requirement.txt in the main directory.
 
 ```bash
 docker build -t app_streamlit .
 docker run -dp 8501:8501 app_streamlit
 ```
+Then you can access the streamlit application at: http://localhost:8501/
 
 ## How to run the tests 
 Use the command beow to run the test for data cleaning:
