@@ -23,10 +23,9 @@ used in each tweet.
 After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
 the "model" folder. 
 
-With the .pt file in place, use the command below go to the "app" directory and run the app. Requirements are listed in requirement.txt in the main directory.
+With the .pt file in place, use the command below to run the app. Requirements are listed in requirement.txt in the main directory.
 
 ```bash
-cd ./app_streamlit
 docker build -t app_streamlit .
 docker run -dp 8501:8501 app_streamlit
 ```
