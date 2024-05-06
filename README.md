@@ -18,3 +18,11 @@ To execute this code again, import the packages if they haven't been imported al
 File emoji_info.csv provides an overview of the dataset, detailing the number of tweets within each processed file
 File emoji_unicode_code_points.txt contains most of the unicode points for the emojis. This file is used to detact emojis 
 used in each tweet. 
+
+## How to run 
+After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
+"model" folder. 
+
+With the .pt file in place, go to the "app" directory and run the app:
+
+(bash here)
