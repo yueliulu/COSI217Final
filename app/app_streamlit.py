@@ -1,12 +1,11 @@
 import streamlit as st
 import sqlite3
-import random
-import re
-import emoji
 import sys
 import os
-sys.path.append(os.path.abspath('../model'))
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
+print(sys.path)
+sys.path.append('/app/model')
+# sys.path.append(os.path.abspath('../model'))
+# os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from predict import predict_with_trained_model, load_trained_model
 from utils_database import update_database, find_top_10_vocab, fetch_data
 
