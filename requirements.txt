@@ -1,0 +1,5 @@
+streamlit==1.34.0
+nltk==3.6.1
+numpy
+transformers==4.40.1
+torch==2.1.1
