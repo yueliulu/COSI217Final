@@ -32,8 +32,14 @@ docker run -dp 8501:8501 app_streamlit
 Then you can access the streamlit application at: http://localhost:8501/
 
 ## How to run the tests 
-Use the command beow to run the test for data cleaning:
+Use the command below to run the test for data cleaning:
 ```bash
 cd ./Data
 python data_cleaning_unit_test.py
+```
+
+Use the command below to run the test for database:
+```bash
+cd ./app
+python db_unit_test.py
 ```
