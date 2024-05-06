@@ -2,6 +2,7 @@ from transformers import BertTokenizer
 import numpy as np
 from utils import *
 import os
+import torch
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -47,6 +48,7 @@ def predict_with_trained_model(input, model):
     print("in predict")
     output = predict(input, model, threshold=0.1)
     return output
+
 
 if __name__ == '__main__':
     input = "Hello, how are you"

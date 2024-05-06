@@ -8,16 +8,9 @@ import os
 sys.path.append(os.path.abspath('../model'))
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 from predict import predict_with_trained_model, load_trained_model
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from utils_database import update_database, find_top_10_vocab, fetch_data
 
-# Download the stopwords corpus if you haven't already
-nltk.download('stopwords')
-nltk.download('punkt')
-english_stop_words = stopwords.words('english')
-
-conn=sqlite3.connect('example.db')
+conn = sqlite3.connect('example.db')
 c = conn.cursor()
 c.execute("""CREATE TABLE IF NOT EXISTS emoji_counts(vocab varchar not null,
                                                      emoji varchar not null,
@@ -30,13 +23,11 @@ c.execute("""CREATE TABLE IF NOT EXISTS inputs(
                 emojis VARCHAR NOT NULL
             );""")
 
+conn_train = sqlite3.connect('Database.db')
+c_train = conn_train.cursor()
+
 model = load_trained_model()
 
-
-class Vocab:
-    def __init__(self, text, emoji):
-        self.text = text
-        self.emoji = emoji
 
 def main():
     example = ("I love COSI217")
@@ -64,7 +55,7 @@ def main():
                 with col2:
                     st.button("No", type='secondary', on_click=set_stage, args=(3,))
                 if st.session_state.stage == 2:
-                    update_database(text, emojis)
+                    update_database(text, emojis, conn, c)
                     st.write("Thank you for your feedback!")
                 elif st.session_state.stage > 2:
                     adjusted = st.text_area('Enter emoji you think is appropriate to help our model do better',
@@ -73,14 +64,15 @@ def main():
                         st.button("Submit My Answer", type='secondary', on_click=set_stage, args=(4,))
                     if st.session_state.stage > 3:
                         adjusted = adjusted.replace(" ", "")
+                        print(adjusted + "This is adjusted")
                         emojis_list = [emoji for emoji in adjusted]
-                        update_database(text, emojis_list)
+                        update_database(text, emojis_list, conn, c)
                         st.write("Your answer is submitted. Thank you!")
 
             with tab2:
                 st.write("Show top ten words shown with generated emoji (stop words filtered)")
                 for e in emojis:
-                    top_10_vocab = find_top_10_vocab(e)
+                    top_10_vocab = find_top_10_vocab(e, c_train)
                     st.subheader(f"Top 10 vocab for emoji {e}")
                     st.table(top_10_vocab)
 
@@ -90,8 +82,8 @@ def main():
     else:
         set_stage(0)
         st.markdown('## Database')
-        data1 = fetch_data("emoji_counts")
-        data2 = fetch_data("inputs")
+        data1 = fetch_data("emoji_counts", c)
+        data2 = fetch_data("inputs", c)
         tab1, tab2 = st.tabs(["Emoji Counts", "Recorded Data"])
         with tab1:
             if data1:
@@ -114,67 +106,6 @@ def set_stage(stage):
 def emoji_generator(text):
     emojis = predict_with_trained_model(text, model)
     return emojis
-
-
-def fetch_data(table):
-    c.execute("SELECT * FROM {}".format(table))
-    return c.fetchall()
-
-
-def find_top_10_vocab(emoji):
-    c.execute("""
-        SELECT vocab, cnt
-        FROM emoji_counts
-        WHERE emoji = ?
-        ORDER BY cnt DESC
-        LIMIT 10
-    """, (emoji,))
-    return c.fetchall()
-
-
-def insert_data(d):
-    with conn:
-        c.execute("insert into emoji_counts values (:vocab, :emoji, :cnt)",
-                  {'vocab': d.text, 'emoji': d.emoji, 'cnt': 1})
-
-
-def update_data(vocab, emoji, original_count):
-    c.execute("UPDATE emoji_counts SET cnt=? WHERE vocab=? AND emoji=?", (original_count + 1, vocab, emoji))
-    conn.commit()
-
-
-def update_inputs_table(text, emojis):
-    with conn:
-        c.execute("INSERT INTO inputs (text, emojis) VALUES (?, ?)", (text, ''.join(emojis)))
-
-
-def filter_stopwords(text):
-    words = word_tokenize(text)
-    stop_words = set(english_stop_words)
-    filtered_words = [word for word in words if word.lower() not in stop_words]
-    filtered = ' '.join(filtered_words)
-    return filtered
-
-
-def update_database(text, emojis):
-    update_inputs_table(text, emojis)
-    text = filter_stopwords(text)
-    print("filtered")
-    print(text)
-    vocab = text.split()
-    print("vocab")
-    print(vocab)
-    print("emojis")
-    print(emojis)
-    for v in vocab:
-        for e in emojis:
-            c.execute("SELECT * FROM emoji_counts WHERE vocab = ? AND emoji = ?", (v,e))
-            result = c.fetchone()
-            if not result:
-                d = Vocab(v, e)
-                insert_data(d)
-            else:
-                update_data(v, e, result[-1])
 
 
 if __name__ == "__main__":
