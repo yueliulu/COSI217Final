@@ -6,7 +6,7 @@ from utils_database import filter_stopwords, fetch_data, find_top_10_vocab, upda
 class TestDatabase(unittest.TestCase):
     def setUp(self):
         """
-        set up the sqlite connect and the cursor for the test
+        set up the sqlite connect and the cursor for the test, also remove the changes from previous runs of this unit test 
         """
 
         self.conn = sqlite3.connect('example.db')
