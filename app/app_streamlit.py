@@ -22,9 +22,9 @@ c.execute("""CREATE TABLE IF NOT EXISTS inputs(
                 emojis VARCHAR NOT NULL
             );""")
 
-conn_train = sqlite3.connect('Database.db')
+conn_train = sqlite3.connect('/app/app/Database.db')
+#conn_train = sqlite3.connect('Database.db')
 c_train = conn_train.cursor()
-
 model = load_trained_model()
 
 
