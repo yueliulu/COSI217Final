@@ -21,8 +21,12 @@ used in each tweet.
 
 ## How to run 
 After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
-"model" folder. 
+the "model" folder. 
 
 With the .pt file in place, go to the "app" directory and run the app:
 
-(bash here)
+```bash
+cd ./app_streamlit
+docker build -t app_streamlit .
+docker run -dp 8501:8501 app_streamlit
+```
