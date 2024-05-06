@@ -19,14 +19,21 @@ File emoji_info.csv provides an overview of the dataset, detailing the number of
 File emoji_unicode_code_points.txt contains most of the unicode points for the emojis. This file is used to detact emojis 
 used in each tweet. 
 
-## How to run 
+## How to run the app
 After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
 the "model" folder. 
 
-With the .pt file in place, go to the "app" directory and run the app:
+With the .pt file in place, use the command below go to the "app" directory and run the app. Requirements are listed in requirement.txt in the main directory.
 
 ```bash
 cd ./app_streamlit
 docker build -t app_streamlit .
 docker run -dp 8501:8501 app_streamlit
+```
+
+## How to run the tests 
+Use the command beow to run the test for data cleaning:
+```bash
+cd ./Data
+python data_cleaning_unit_test.py
 ```
