@@ -54,7 +54,7 @@ class TestDatabase(unittest.TestCase):
         """
         test the function update_data()
         given a word and an emoji, their count in the database (i.e., Column cnt) should be updated
-        this cannot be returned in console but is reflected in the database
+        this function does not return anything but there are changes on the database
         """
 
         update_data("hate", '😭', 1, self.conn, self.c)
@@ -85,7 +85,7 @@ class TestDatabase(unittest.TestCase):
         given a string of plain text and a string of emojis,
         the database should store them as a row in Table inputs,
         and each token should be stored together with each emoji in Table emoji_counts
-        this cannot be returned in console but is reflected in the database
+        this function does not return anything but there are changes on the database
         """
 
         update_database("I hate cinnamon", "😭😠", self.conn, self.c)
@@ -103,9 +103,10 @@ class TestDatabase(unittest.TestCase):
 
     def test_update_inputs_table(self):
         """
-
-        Returns:
-
+        test the funciton update_inputs_table()
+        given a string of text and a string of emoji, 
+        the database should them as a row in Table inputs 
+        this function does not return anything but there are changes on the database
         """
         update_inputs_table("I like you", "🥚", self.conn, self.c)
 
