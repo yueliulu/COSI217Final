@@ -46,6 +46,6 @@ streamlit run app_streamlit.py
 ## How to run the tests 
 The test results can only be seen on the IDE. 
 
-To run the unit test for data cleaning, please go to the "Data" folder and run data_cleaning_unit_test.py file on the IDE (e.g., PyCharm)
+To run the unit test for data cleaning, please go to the "Data" folder and run data_cleaning_unit_test.py file on the IDE 
 
 To run the unit test for database, please go to the "app" folder and run db_unit_test.py on the IDE 
