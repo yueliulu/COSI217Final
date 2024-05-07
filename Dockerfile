@@ -1,6 +1,9 @@
 FROM python:3.11-slim
 WORKDIR /
-COPY . /
+COPY ./app /app
+COPY ./model /model
+COPY ./Dockerfile /
+COPY ./requirements.txt /
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 EXPOSE 8501
