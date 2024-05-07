@@ -20,12 +20,13 @@ File emoji_unicode_code_points.txt contains most of the unicode points for the e
 used in each tweet. 
 
 ## How to run the app
-### A. Run With Docker (requires 16+GB RAM)
-
 After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
 the "model" folder. 
 
-With the .pt file in place, first make sure to start the Docker, then use the command below to run the app. Requirements are listed in requirement.txt in the main directory.
+With the .pt file in place, choose one of the following ways to run:
+
+### A. Run With Docker (requires 16+GB RAM)
+First make sure to start the Docker, then use the command below to run the app. Requirements are listed in requirement.txt in the main directory.
 
 ```bash
 docker build -t app_streamlit .
