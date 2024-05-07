@@ -44,14 +44,8 @@ streamlit run app_streamlit.py
 ```
 
 ## How to run the tests 
-Use the command below to run the test for data cleaning:
-```bash
-cd ./Data
-python data_cleaning_unit_test.py
-```
+The test results can only be seen on the IDE. 
 
-Use the command below to run the test for database:
-```bash
-cd ./app
-python db_unit_test.py
-```
+To run the unit test for data cleaning, please go to the "Data" folder and run data_cleaning_unit_test.py file on the IDE (e.g., PyCharm)
+
+TO run the unit test for database, please go to the "app" folder and run db_unit_test.py on the IDE 
