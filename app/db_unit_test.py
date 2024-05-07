@@ -30,7 +30,7 @@ class TestDatabase(unittest.TestCase):
         """
 
         text = "when the meets a and an I laugh"
-        result = "meets laugh"
+        result = ["meets", "laugh"]
         self.assertEqual(filter_stopwords(text),result)
         print("filter passed")
 

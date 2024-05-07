@@ -20,6 +20,8 @@ File emoji_unicode_code_points.txt contains most of the unicode points for the e
 used in each tweet. 
 
 ## How to run the app
+A. Run With Docker
+
 After clone the current directory, go to https://drive.google.com/drive/folders/1EFLz33tn4HC4Dwm4CB5qyY7rbjluCy0x, download best_model.pt, and move it into
 the "model" folder. 
 
@@ -30,6 +32,16 @@ docker build -t app_streamlit .
 docker run -dp 8501:8501 app_streamlit
 ```
 Then you can access the streamlit application at: http://localhost:8501/
+
+Given the large size of our Database.db, running the app with Docker would require the computer with RAM larger than 16gb. If the RAM is not large enough, the app might disconnect with no error after several requests.
+
+B. Run without Docker
+
+To run the app without Docker, comment out line 5 and 11 in app_streamlit.py, and comment in line 6, 7, and 12 of the same file. Navigates to app folder then use the command below to run the app:
+
+```bash
+streamlit run app_streamlit.py
+```
 
 ## How to run the tests 
 Use the command below to run the test for data cleaning:
