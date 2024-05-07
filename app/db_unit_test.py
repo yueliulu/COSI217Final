@@ -26,12 +26,13 @@ class TestDatabase(unittest.TestCase):
         """
         test the function filter_stopwords()
         given a string of text in English,
-        the expected result should be the string without stopwords (e.g., the, and, I)
+        the expected result should be a list of strings that are not stopwords and are proper English word stems
         """
 
-        text = "when the meets a and an I laugh"
-        result = ["meets", "laugh"]
+        text = "when the falls in love with a and an I laugh"
+        result = ["love", "laugh"]
         self.assertEqual(filter_stopwords(text),result)
+        
         print("filter passed")
 
     def test_fetch_data(self):
